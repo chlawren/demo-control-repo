@@ -1,0 +1,81 @@
+---
+
+lookup_options:
+  accounts::accounts:
+    merge: deep
+
+ssh::client_options:
+    'Host *':
+        Protocol: '2'
+        GSSAPIAuthentication: 'yes'
+        SendEnv: 
+          - 'LANG LC_*'
+          - 'XMODIFIERS'
+        ForwardX11Trusted: 'yes'
+        ServerAliveInterval: '10'
+        ForwardAgent: 'yes'
+
+ssh::server_options:
+    AcceptEnv: 
+      - 'LANG LC_*' 
+      - 'XMODIFIERS'
+    AuthorizedKeysFile: '.ssh/authorized_keys'
+    Protocol: '2'
+    PasswordAuthentication: 'yes'
+    SyslogFacility: 'AUTHPRIV'
+    X11Forwarding: 'yes' 
+    PrintMotd: 'yes' 
+    GSSAPIAuthentication: 'yes'
+    Banner: '/etc/issue.net'
+    PermitRootLogin: without-password
+    HostbasedAuthentication: 'no'
+    IgnoreRhosts: 'yes'
+    PermitEmptyPasswords: 'no'
+
+pam::allowed_users: ALL
+pam::login_pam_access: absent
+pam::pam_account_lines:
+  - account     required      pam_unix.so
+  - account     sufficient    pam_localuser.so
+  - account     sufficient    pam_succeed_if.so uid < 500 quiet
+  - account     required      pam_permit.so
+pam::pam_auth_lines:
+  - auth        required      pam_env.so
+  - auth        sufficient    pam_unix.so nullok try_first_pass
+  - auth        requisite     pam_succeed_if.so uid >= 500 quiet
+  - auth        required      pam_deny.so
+pam::pam_password_lines:
+  - password    requisite     pam_cracklib.so try_first_pass retry=3 type=
+  - password    sufficient    pam_unix.so sha512 shadow nullok try_first_pass use_authtok remember=5
+  - password    required      pam_deny.so
+pam::pam_password_password_lines:
+  - password    requisite     pam_cracklib.so try_first_pass retry=3 type=
+  - password    sufficient    pam_unix.so md5 shadow nullok try_first_pass use_authtok
+  - password    required      pam_deny.so
+pam::pam_session_lines:
+  - session     optional      pam_keyinit.so revoke
+  - session     required      pam_limits.so
+  - session     [success=1 default=ignore] pam_succeed_if.so service in crond quiet use_uid
+  - session     required      pam_unix.so
+pam::services:
+    su:
+      lines:
+      - auth            sufficient      pam_rootok.so
+      - auth            required        pam_wheel.so use_uid
+      - auth            include         system-auth
+      - account         sufficient      pam_succeed_if.so uid = 0 use_uid quiet
+      - account         include         system-auth
+      - password        include         system-auth
+      - session         include         system-auth
+      - session         optional        pam_xauth.so
+pam::sshd_pam_access: absent
+pam::system_auth_ac_auth_lines:
+  - auth        required      pam_env.so
+  - auth        sufficient    pam_unix.so nullok try_first_pass
+  - auth        requisite     pam_succeed_if.so uid >= 500 quiet
+  - auth        required      pam_deny.so
+
+pam::limits::config_file_lines:
+  - ! "*\t\tsoft\tcore\t\t0"
+  - ! "*\t\thard\tcore\t\t0"
+

@@ -1,0 +1,25 @@
+# <ENVIRONMENT>/hiera.yaml
+# # This is changed by Chris
+---
+version: 5
+
+defaults:  # Used for any hierarchy level that omits these keys.
+  datadir: data  # This path is relative to the environment -- <ENVIRONMENT>/data
+  data_hash: yaml_data  # Use the built-in YAML backend.
+
+hierarchy:
+  - name: "Per-node data"                   # Human-readable name.
+    path: "nodes/%{trusted.certname}.yaml"  # File path, relative to datadir.
+                                   # ^^^ IMPORTANT: include the file extension!
+
+  - name: "Major Version"
+    path: "os/%{facts.os.name}-%{facts.os.release.major}.yaml"
+
+  - name: "Distribution Name"
+    path: "os/%{facts.os.name}.yaml"
+
+  - name: "Operating System Family Name"
+    path: "os/%{facts.os.family}.yaml"
+
+  - name: "Common data"
+    path: "common.yaml"

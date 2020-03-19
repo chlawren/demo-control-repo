@@ -1,0 +1,74 @@
+---
+message: "This node is using common data"
+
+ntp::servers:
+  - ntp1.demonet.com 
+  - ntp1.demonet.com
+
+timezone::timezone: 'Europe/London'
+selinux::mode: 'permissive'
+
+profile::rsyslog::log_local: true
+profile::rsyslog::remote_type: udp
+profile::rsyslog::remote_servers:
+  - host: demo006
+    pattern: local7.*;kern.warning;mail.none;*.emerg;*.info;auth.*
+    protocol: udp
+
+rsyslog::package_status: 'present'
+rsyslog::client::log_local: true
+rsyslog::client::remote_type: udp
+rsyslog::client::remote_servers:
+  - host: demo7
+    pattern: local7.*;kern.warning;mail.none;*.emerg;*.info;auth.*
+    protocol: udp
+
+accounts::accounts:
+      ! '@linux_admins':
+        authorized_keys: ''
+      root:
+        authorized_keys: ''
+      ! '@default_accounts':
+        authorized_keys: ''
+
+accounts::groups:
+      nagios:
+        gid: '3111'
+      cisbench:
+        gid: '3012'
+      nrpe:
+        gid: '499'
+      jenkins:
+        gid: '1007'
+
+accounts::ssh_authorized_key_title: '%%{}{account}'
+accounts::ssh_keys:
+      demouser:
+        public: AAAAB3NzaC1yc2EAAAABIwAAAQEAqrXywn4bWRPL2tWtKl7bsWofEvljuZXFvO4V5oFOixyn2dfcwXCBqq01SWTprdE67uyqlgrYatC+I4zQRV7RVJEcMK+egYWu37WlQU3W8M8+fkfnRTgiEBIQMofsKZ+OrDeut955MAUbQYXMI67XugpixSWPlTrtxlja1vDeGeLXKIm//siW1PoZQvaaJXGQ8h333KOB0thcHIe5/KiBcoXkWYp6s9JavZTaCuTCucgirNYTFWaSzE1ab8OaNqV98GOWFC4NbIx4JVOEVRgIY3Un6L9wKvVWjMfPvUHakcAI6bGieElT2BoVHmJNHRh3EZZuRNKthjOv0K8TC50zuQ==
+        type: ssh-rsa
+
+accounts::usergroups:
+     linux_admins:
+     - demouser
+     default_accounts:
+     - cisbench
+
+accounts::users:
+      root:
+        comment: root
+        uid: 0
+        password_max_age: '56'
+        home: /root
+        groups:
+        - daemon
+        - sys
+        - adm
+        - disk
+        - wheel
+      demouser:
+        comment: I am a demo
+        uid: 550
+        password_max_age: '99999'
+        groups:
+        - wheel
+        - git

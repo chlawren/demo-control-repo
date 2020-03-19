@@ -1,0 +1,9 @@
+---
+
+lookup_options:
+  accounts::accounts:
+    merge: deep
+
+accounts::accounts:
+  '@linux_admins':
+    authorized_keys: '':
